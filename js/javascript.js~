@@ -1,0 +1,83 @@
+
+var memory_array=['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','L','L','M','M','N','N'];
+var memory_values=[];
+var memory_tile_ids=[];
+var tiles_flipped = 0;
+
+Array.prototype.memory_tile_shuffle=function(){
+
+	var i=this.length, j, temp;
+	while(--i>0){
+		j=Math.floor(Math.random()*(i+1));
+		temp=this[j];
+		this[j]=this[i];
+		this[i]=temp;
+	}
+
+}
+
+function newBoard(){
+	tiles_flipped=0;
+	var output='';
+	memory_array.memory_tile_shuffle();
+	for(var i=0;i<memory_array.length;i++){
+		output += '<div id="tile_'+i+'" onclick="memoryFlipTile(this,\''+memory_array[i]+'\') "></div>'; //genero output
+	}
+	document.getElementById('memory_board').innerHTML = output;						//lo metto nel memory board
+}
+
+function memoryFlipTile(tile,val){
+	if(tile.innerHTML=="" && memory_values.length<2){//guardo se sono nella condizione di giocare quindi la carta cliccata è non e\ ancora girata e ho girato meno di due carte
+		var a="images/"+val+".jpg";
+		tile.style.background='url('+a+') no-repeat';		//visualizzazione carta cliccata: sfondo bianco e valore della carta 
+		//tile.innerHTML=val;
+		if(memory_values.length==0){		//non ci sono ancora carte girate
+			memory_values.push(val);	//values e ids attributi della carta che l'user sta cliccando, servo ad identificarla
+			memory_tile_ids.push(tile.id);
+		}
+		else if(memory_values.length==1){	//ho gia una carta girata ora clicco la seconda
+			memory_values.push(val);	//salvo gli attributi di questa carta
+			memory_tile_ids.push(tile.id);
+			if(memory_values[0] == memory_values[1]){//controllo se le carte sono uguali
+				tiles_flipped +=2;		//aggiorno il numero di carte trovate
+				//clear both arrays per essere pronta alla seconda mandata
+				memory_values=[];		
+				memory_tile_ids=[];
+				//check if board is clear
+				if(tiles_flipped == memory_array.length){//guardo se tutte le coppie sono state trovate
+					
+					var res;
+					
+					res = window.confirm("vuoi continuare a giocare")
+					if(res){
+					window.alert("board cleared...generating new board");//riinizializzo tutto per un altra partita
+					
+					document.getElementById('memory_board').innerHTML="";
+					newBoard();}
+					
+					else
+						window.prompt("ciaociao!");
+				}
+				
+			
+			}
+			
+			else{	//se grate le carte non erano uguali
+				function flipBack(){
+					//rigira le carte
+					var tile_1=document.getElementById(memory_tile_ids[0]);
+					var tile_2=document.getElementById(memory_tile_ids[1]);
+					tile_1.style.background='url("images/click.jpg") no-repeat';
+					tile_1.innerHTML="";
+					tile_2.style.background='url("images/click.jpg") no-repeat';
+					tile_2.innerHTML="";
+					
+					memory_values=[];
+					memory_tile_ids=[];
+				}
+			setTimeout(flipBack,700);
+			}
+			
+		}
+	}
+}
